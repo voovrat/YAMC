@@ -3,7 +3,7 @@ STEP 0:
 We have the system, described in ion100.composition.
 Look at it:
 
-cat ion100.composition
+cat ions100.composition
 
 3
 SPCE.mol  100
@@ -48,7 +48,7 @@ To look what is inside:
 
 make moltab2xyz
 
-./moltab2xyz ion100.composition system.moltab  system.xyz
+./moltab2xyz ions100.composition system.moltab  system.xyz
 
 The file system.xyz in the text *.xyz format will be created
 To look at it one can use any molecular viewes, e.g. vmd or jmol:
@@ -69,7 +69,7 @@ Then run the simulation
 
  make runmc
 
- ./runmc parameters.prm ion100.composition system.moltab
+ ./runmc parameters.prm ions100.composition system.moltab
 
 Output:
 ......_......_.v..vv........._............................._...v....._v..v.v....._....._.....v..v...e         100
@@ -93,7 +93,7 @@ To clear the simulation data and re-start the simulation run
 make clearmc
 
 ./clearmc parameters.prm
-./runmc parameters.prm ion100.composition system.moltab
+./runmc parameters.prm ions100.composition system.moltab
 
 STEP 6:
 Don't kill the simulation and let it do 10000 steps.
@@ -138,7 +138,7 @@ dd if=traj.moltraj of=fram11.moltab bs=1320 skip=10 count=1
 
 You can again look at it:
 
-./moltab2xyz ion100.composition fram11.moltab  fram11.xyz
+./moltab2xyz ions100.composition fram11.moltab  fram11.xyz
 
 jmol fram11.xyz
 
@@ -148,7 +148,7 @@ RDFs
 
 make mcrdf2
 
-./mcrdf2 parameters.prm  ion100.composition RDF_ 0.1 12  water,Na,Cl
+./mcrdf2 parameters.prm  ions100.composition RDF_ 0.1 12  water,Na,Cl
 
 the files like RDF_water_water.dat, RDF_water_Na.dat etc. will be generated
 
@@ -171,7 +171,7 @@ Calculate forces
 
 make mc_calc_forces
 
-./mc_calc_forces parameters.prm ion100.composition forces.ftraj
+./mc_calc_forces parameters.prm ions100.composition forces.ftraj
 
 
 the binary file forces.ftraj will be generated
@@ -198,7 +198,7 @@ also, you can calculate mean force between the two particles
 
 make mc_mean_force
 
-./mc_mean_force parameters.prm ion100.composition forces.ftraj  1 2 20 0.1  MF.dat
+./mc_mean_force parameters.prm ions100.composition forces.ftraj  1 2 20 0.1  MF.dat
 
 The file MF.dat will be generated
 

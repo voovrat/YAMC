@@ -1,0 +1,391 @@
+EXE=mc_water
+COMPILER=gfortran
+
+COMMON_FLAGS=-fno-align-commons -ffree-line-length-none  -ffpe-trap=invalid 
+
+CFLAGS=-c -O3 -march=native $(COMMON_FLAGS)
+LFLAGS=-O3 -march=native $(COMMON_FLAGS)
+#CFLAGS=-c -g -O0 $(COMMON_FLAGS)
+#LFLAGS=-O0 -g $(COMMON_FLAGS)
+
+OBJ_param=parameters.o constants.o io.o error.o string.o SystemSettings.o
+
+OBJ_Atomic=AtomicData.o geometry.o  random.o BiasedRandom.o MoleculeHandler.o Molecule.o MoleculeTable.o LJTypes.o module_periodic_table.o  composition.o matrix3x3.o scale_box.o 
+
+OBJ_Ewald= FourierGrid.o  EwaldSumRealSpace.o EwaldSumKSpace.o EwaldSumExternal.o RhoSquared.o ForceKSpace.o MonteCarloMove.o SumSinCosKR.o RealSumLocal.o Functions.o EwaldSumTails.o 
+
+OBJ=$(OBJ_param) $(OBJ_Atomic) $(OBJ_Ewald) MC.o 
+
+OBJ_Luc=MCLuc.o lecture_fichier.o
+
+mc_calc_virial: mc_calc_virial.o FloatingPoint.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o mc_calc_virial mc_calc_virial.o FloatingPoint.o $(OBJ_Atomic) $(OBJ_param)
+
+mc_accum_luc: mc_accum_luc.o runmc.o FloatingPoint.o MCAccumLuc.o $(OBJ)
+	$(COMPILER) $(LFLAGS) -o mc_accum_luc mc_accum_luc.o runmc.o FloatingPoint.o MCAccumLuc.o $(OBJ) 
+
+mc_calc_forces: mc_calc_forces.o runmc.o FloatingPoint.o  $(OBJ)
+	$(COMPILER) $(LFLAGS) -o mc_calc_forces mc_calc_forces.o runmc.o FloatingPoint.o  $(OBJ) 
+
+mc_mean_force: mc_mean_force.o runmc.o FloatingPoint.o  $(OBJ)
+	$(COMPILER) $(LFLAGS) -o mc_mean_force mc_mean_force.o runmc.o FloatingPoint.o  $(OBJ) 
+
+
+mccont: mccont.o runmc.o $(OBJ)
+	$(COMPILER) $(LFLAGS) -o mccont runmc.o mccont.o $(OBJ) 
+
+runmc: mc_main.o runmc.o $(OBJ)
+	$(COMPILER) $(LFLAGS) -o runmc runmc.o mc_main.o $(OBJ) 
+
+test_xchange: test_xchange.o $(OBJ)
+	$(COMPILER) $(LFLAGS) -o test_xchange test_xchange.o $(OBJ) 
+
+
+clearmc: clearmc.o $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o clearmc clearmc.o $(OBJ_param)
+
+mc_rmsd: mc_rmsd.o $(OBJ_param) $(OBJ_Atomic) 
+	$(COMPILER) $(LFLAGS) -o mc_rmsd mc_rmsd.o $(OBJ_param) $(OBJ_Atomic)
+
+mcrdf: mcrdf.o $(OBJ_param) $(OBJ_Atomic)
+	$(COMPILER) $(LFLAGS) -o mcrdf mcrdf.o $(OBJ_param) $(OBJ_Atomic)
+
+mcrdf2: mcrdf2.o $(OBJ_param) $(OBJ_Atomic)
+	$(COMPILER) $(LFLAGS) -o mcrdf2 mcrdf2.o $(OBJ_param) $(OBJ_Atomic)
+
+
+mc_indeces: mc_indeces.o $(OBJ_param) $(OBJ_Atomic) 
+	$(COMPILER) $(LFLAGS) -o mc_indeces mc_indeces.o $(OBJ_param) $(OBJ_Atomic)
+
+
+
+test_energy: test_energy.o $(OBJ) $(OBJ_Luc)
+	$(COMPILER) $(LFLAGS) -o test_energy test_energy.o $(OBJ) $(OBJ_Luc)
+
+
+testParameters: $(OBJ_param) testParameters.o 
+	$(COMPILER) $(LFLAGS) -o testParameters $(OBJ_param) testParameters.o
+testParameters.f90:
+
+
+#
+#accum_h2o_mnl.o accum_h2o_mnmunukhi.o alea_dp.o in55_f.o inmc_h2o_ljtot_fb_mnl.o irn55.o lecture_fichier.o mcluc2_h2o_fb.o move_h2o_ljtot_fb_new.o resmc_h2o_mnl.o resul_h2o_ljtot_mnl.o sormc_h2o_mnl.o velomc_h2o.o
+
+
+testOrientations: testOrientations.o $(OBJ_Atomic)
+	$(COMPILER) $(LFLAGS) -o testOrientations testOrientations.o $(OBJ_Atomic)
+
+testLJTypes: testLJTypes.o $(OBJ)
+	$(COMPILER) $(LFLAGS) -o testLJTypes testLJTypes.o $(OBJ)
+
+
+#!OBJ_MoleculeTable=AtomicData.o geometry.o constants.o random.o io.o error.o MoleculeHandler.o Molecule.o MoleculeTable.o LJTypes.o FourierGrid.o module_periodic_table.o composition.o 
+OBJ_MoleculeTable=$(OBJ_Atomic)
+
+OBJ_moltab2xyz=$(OBJ_MoleculeTable) moltab2xyz.o
+
+
+test_movemc: test_movemc.o $(OBJ) $(OBJ_Luc)
+	$(COMPILER) $(LFLAGS) -o test_movemc test_movemc.o $(OBJ) $(OBJ_Luc)
+
+test_mcvol: test_mcvol.o $(OBJ) $(OBJ_Luc)
+	$(COMPILER) $(LFLAGS) -o test_mcvol test_mcvol.o $(OBJ) $(OBJ_Luc)
+
+moltab2xyz: moltab2xyz.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o moltab2xyz  $(OBJ_Atomic) $(OBJ_param) moltab2xyz.o
+
+mc_make_round_holes: mc_make_round_holes.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o mc_make_round_holes  mc_make_round_holes.o $(OBJ_Atomic) $(OBJ_param)
+
+moltab_bin2text: moltab_bin2text.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o moltab_bin2text  moltab_bin2text.o $(OBJ_Atomic) $(OBJ_param)
+
+moltab_text2bin: moltab_text2bin.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o moltab_text2bin  moltab_text2bin.o $(OBJ_Atomic) $(OBJ_param)
+
+
+
+forces2text: forces2text.o FloatingPoint.o io.o error.o SystemSettings.o 
+	$(COMPILER) $(LFLAGS) -o forces2text forces2text.o FloatingPoint.o io.o error.o SystemSettings.o
+
+
+genMoleculeTable: genMoleculeTable.o $(OBJ_Atomic) $(OBJ_param)
+	$(COMPILER) $(LFLAGS) -o genMoleculeTable genMoleculeTable.f90 $(OBJ_Atomic) $(OBJ_param)
+
+testMoleculeTable: testMoleculeTable.o $(OBJ_Atomoic)
+	$(COMPILER) $(LFLAGS) -o testMoleculeTable testMoleculeTable.f90 $(OBJ_Atomic)
+
+
+release: CFLAGS=-O3 -c $(COMMON_FLAGS)
+release: LFLAGS=-O3 $(COMMON_FLAGS)
+release: $(OBJ) mc_main.o runmc.o
+	$(COMPILER) $(LFLAGS) -o runmc $(OBJ) mc_main.o runmc.o 
+
+debug: CFLAGS+=-O0 -g 
+debug: LFLAGS+=-O0 -g
+debug: $(OBJ)
+	$(COMPILER) $(LFLAGS) -o $(EXE) $(OBJ) 
+
+all: $(OBJ)
+	$(COMPILER) $(LFLAGS) -o $(EXE) $(OBJ)
+
+compile: $(OBJ)
+
+clean: 
+	rm -f *.o *.mod
+
+mc_rmsd.o: SystemSettings.o io.o string.o composition.o MoleculeTable.o mc_rmsd.f90
+	$(COMPILER) $(CFLAGS) mc_rmsd.f90
+mc_rmsd.f90:
+
+mc_calc_virial.o: FloatingPoint.o io.o MoleculeTable.o MoleculeHandler.o composition.o mc_calc_virial.f90
+	$(COMPILER) $(CFLAGS) mc_calc_virial.f90
+mc_calc_virial.f90:
+
+forces2text.o: io.o SystemSettings.o FloatingPoint.o forces2text.f90
+	$(COMPILER) $(CFLAGS) forces2text.f90
+forces2text.f90:
+
+mcrdf.o: parameters.o constants.o MoleculeTable.o io.o composition.o SystemSettings.o error.o mcrdf.f90
+	$(COMPILER) $(CFLAGS) mcrdf.f90
+mcrdf.f90:  
+
+mcrdf2.o: parameters.o constants.o MoleculeTable.o io.o composition.o SystemSettings.o error.o mcrdf2.f90
+	$(COMPILER) $(CFLAGS) mcrdf2.f90
+mcrdf2.f90:  
+
+
+mc_indeces.o: parameters.o constants.o MoleculeTable.o io.o composition.o SystemSettings.o error.o mc_indeces.f90
+	$(COMPILER) $(CFLAGS) mc_indeces.f90
+mc_indeces.f90:  
+
+
+clearmc.o: parameters.o SystemSettings.o clearmc.f90
+	$(COMPILER) $(CFLAGS) clearmc.f90
+clearmc.f90:
+
+testParameters.o: parameters.o testParameters.f90
+	$(COMPILER) $(CFLAGS) testParameters.f90
+testParameters.f90:
+
+testOrientations.o: MoleculeTable.o AtomicData.o parameters.o io.o composition.o SystemSettings.o testOrientations.f90
+	$(COMPILER) $(CFLAGS) testOrientations.f90
+testOrientations.f90:  
+
+MCLuc.o: lecture_fichier.o parameters.o constants.o random.o MCLuc.f90
+	$(COMPILER) $(CFLAGS) MCLuc.f90
+MCLuc.f90:
+
+test_energy.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o  MCLuc.o test_energy.f90
+	$(COMPILER) $(CFLAGS) test_energy.f90
+test_energy.f90:  
+
+test_movemc.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o MCLuc.o random.o test_movemc.f90 
+	$(COMPILER) $(CFLAGS) test_movemc.f90
+test_movemc.f90:  
+
+test_mcvol.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o MCLuc.o random.o test_mcvol.f90 
+	$(COMPILER) $(CFLAGS) test_mcvol.f90
+test_mcvol.f90:  
+
+mc_main.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o random.o runmc.o mc_main.f90 
+	$(COMPILER) $(CFLAGS) mc_main.f90
+mc_main.f90:  
+
+mccont.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o random.o runmc.o mccont.f90 
+	$(COMPILER) $(CFLAGS) mccont.f90
+mccont.f90:  
+
+
+mc_calc_forces.o: parameters.o MC.o AtomicData.o MoleculeTable.o SystemSettings.o LJTypes.o random.o runmc.o FloatingPoint.o mc_calc_forces.f90 
+	$(COMPILER) $(CFLAGS) mc_calc_forces.f90
+mc_calc_forces.f90:  
+
+mc_accum_luc.o: parameters.o MC.o AtomicData.o composition.o constants.o EwaldSumKSpace.o EwaldSumRealSpace.o EwaldSumExternal.o MoleculeTable.o SystemSettings.o LJTypes.o random.o runmc.o FloatingPoint.o MCAccumLuc.o mc_accum_luc.f90 
+	$(COMPILER) $(CFLAGS) mc_accum_luc.f90
+mc_accum_luc.f90:  
+
+
+
+mc_mean_force.o: parameters.o  AtomicData.o MoleculeTable.o SystemSettings.o runmc.o geometry.o FloatingPoint.o mc_mean_force.f90 
+	$(COMPILER) $(CFLAGS) mc_mean_force.f90
+mc_mean_force.f90:  
+
+FloatingPoint.o: io.o constants.o FloatingPoint.f90
+	$(COMPILER) $(CFLAGS) FloatingPoint.f90
+FloatingPoint.f90: 
+
+
+moltab2xyz.o: composition.o MoleculeTable.o SystemSettings.o io.o AtomicData.o moltab2xyz.f90
+	$(COMPILER) $(CFLAGS) moltab2xyz.f90
+moltab2xyz.f90: 
+
+mc_make_round_holes.o: composition.o MoleculeTable.o SystemSettings.o io.o AtomicData.o Molecule.o MoleculeHandler.o string.o mc_make_round_holes.f90
+	$(COMPILER) $(CFLAGS) mc_make_round_holes.f90
+mc_make_round_holes.f90: 
+
+moltab_bin2text.o: composition.o MoleculeTable.o SystemSettings.o io.o  moltab_bin2text.f90
+	$(COMPILER) $(CFLAGS) moltab_bin2text.f90
+moltab_bin2text.f90: 
+
+moltab_text2bin.o: composition.o MoleculeTable.o SystemSettings.o io.o  moltab_text2bin.f90
+	$(COMPILER) $(CFLAGS) moltab_text2bin.f90
+moltab_text2bin.f90: 
+
+
+
+
+
+genMoleculeTable.o: composition.o MoleculeTable.o SystemSettings.o io.o geometry.o genMoleculeTable.f90
+	$(COMPILER) $(CFLAGS) genMoleculeTable.f90
+genMoleculeTable.f90:  
+
+testLJTypes.o: MoleculeTable.o MoleculeHandler.o Molecule.o SystemSettings.o LJTypes.o testLJTypes.f90 
+	$(COMPILER) $(CFLAGS) testLJTypes.f90
+testLJTypes.f90:
+
+testMoleculeTable.o: MoleculeTable.o MoleculeHandler.o Molecule.o SystemSettings.o composition.o testMoleculeTable.f90
+	$(COMPILER) $(CFLAGS) testMoleculeTable.f90
+testMoleculeTable.f90:
+
+
+random.o: random.f90
+	$(COMPILER) $(CFLAGS) random.f90
+random.f90:
+
+geometry.o: constants.o matrix3x3.o geometry.f90
+	$(COMPILER) $(CFLAGS) geometry.f90
+geometry.f90:
+
+PhysicalParameters.o: lecture_fichier.o constants.o PhysicalParameters.f90
+	$(COMPILER) $(CFLAGS) PhysicalParameters.f90
+PhysicalParameters.f90:
+
+
+lecture_fichier.o: lecture_fichier.F90
+	$(COMPILER) $(CFLAGS) lecture_fichier.F90
+lecture_fichier.F90:
+
+constants.o: constants.f90
+	$(COMPILER) $(CFLAGS) constants.f90
+constants.f90:
+
+io.o: error.o SystemSettings.o io.f90 
+	$(COMPILER) $(CFLAGS) io.f90
+io.f90:
+
+error.o: SystemSettings.o error.f90
+	$(COMPILER) $(CFLAGS) error.f90
+error.f90:
+
+SystemSettings.o: SystemSettings.f90
+	$(COMPILER) $(CFLAGS) SystemSettings.f90
+SystemSettings.f90:
+
+Molecule.o: io.o SystemSettings.o module_periodic_table.o geometry.o string.o Molecule.f90
+	$(COMPILER) $(CFLAGS) Molecule.f90
+Molecule.f90:
+
+MoleculeHandler.o: Molecule.o error.o MoleculeHandler.f90
+	$(COMPILER) $(CFLAGS) MoleculeHandler.f90
+MoleculeHandler.f90:
+
+MoleculeTable.o: Molecule.o error.o random.o constants.o geometry.o MoleculeHandler.o AtomicData.o composition.o MoleculeTable.f90
+	$(COMPILER) $(CFLAGS) MoleculeTable.f90
+MoleculeTable.f90:
+
+AtomicData.o: SystemSettings.o error.o io.o AtomicData.f90
+	$(COMPILER) $(CFLAGS) AtomicData.f90
+AtomicData.f90: 
+
+scale_box.o: AtomicData.o MoleculeTable.o MoleculeHandler.o Molecule.o geometry.o scale_box.f90
+	$(COMPILER) $(CFLAGS) scale_box.f90
+scale_box.f90:
+
+LJTypes.o: error.o LJTypes.f90
+	$(COMPILER) $(CFLAGS) LJTypes.f90
+LJTypes.f90: 
+
+FourierGrid.o: error.o FourierGrid.f90
+	$(COMPILER) $(CFLAGS) FourierGrid.f90
+FourierGrid.f90:
+
+module_periodic_table.o: module_periodic_table.f90
+	$(COMPILER) $(CFLAGS) module_periodic_table.f90
+module_periodic_table.f90: 
+
+MC.o: EwaldSumRealSpace.o EwaldSumKSpace.o EwaldSumExternal.o ForceKSpace.o SystemSettings.o MonteCarloMove.o MoleculeTable.o RhoSquared.o SumSinCosKR.o MC.f90 EwaldSumTails.o composition.o scale_box.o MC.f90
+	$(COMPILER) $(CFLAGS) MC.f90
+MC.f90: 
+
+EwaldSumRealSpace.o: AtomicData.o LJTypes.o error.o RealSumLocal.o EwaldSumRealSpace.f90
+	$(COMPILER) $(CFLAGS) EwaldSumRealSpace.f90 
+EwaldSumRealSpace.f90:
+
+EwaldSumKSpace.o: FourierGrid.o SumSinCosKR.o LJTypes.o AtomicData.o SystemSettings.o RhoSquared.o parameters.o EwaldSumKSpace.f90
+	$(COMPILER) $(CFLAGS) EwaldSumKSpace.f90
+EwaldSumKSpace.f90: 
+
+SumSinCosKR.o: FourierGrid.o SumSinCosKR.f90
+	$(COMPILER) $(CFLAGS) SumSinCosKR.f90
+SumSinCosKR.f90:
+
+RhoSquared.o: FourierGrid.o SumSinCosKR.o LJTypes.o RhoSquared.f90
+	$(COMPILER) $(CFLAGS) RhoSquared.f90
+RhoSquared.f90:
+
+ForceKSpace.o: FourierGrid.o SumSinCosKR.o SystemSettings.o constants.o ForceKSpace.f90
+	$(COMPILER) $(CFLAGS) ForceKSpace.f90
+ForceKSpace.f90: 
+
+MonteCarloMove.o: parameters.o random.o geometry.o MonteCarloMove.f90
+	$(COMPILER) $(CFLAGS) MonteCarloMove.f90
+MonteCarloMove.f90:
+
+parameters.o: string.o io.o error.o constants.o parameters.f90
+	$(COMPILER) $(CFLAGS) parameters.f90
+parameters.f90: 
+
+EwaldSumExternal.o: parameters.o EwaldSumExternal.f90
+	$(COMPILER) $(CFLAGS) EwaldSumExternal.f90
+EwaldSumExternal.f90: 
+
+RealSumLocal.o: Functions.o parameters.o RealSumLocal.f90
+	$(COMPILER) $(CFLAGS) RealSumLocal.f90
+RealSumLocal.f90:  
+
+Functions.o: Functions.f90
+	$(COMPILER) $(CFLAGS) Functions.f90
+Functions.f90:
+
+composition.o: SystemSettings.o io.o MoleculeHandler.o Molecule.o composition.f90
+	$(COMPILER) $(CFLAGS) composition.f90
+composition.f90: 
+
+string.o: SystemSettings.o string.f90
+	$(COMPILER) $(CFLAGS) string.f90
+string.f90:
+
+EwaldSumTails.o: parameters.o constants.o composition.o LJTypes.o EwaldSumTails.f90
+	$(COMPILER) $(CFLAGS) EwaldSumTails.f90
+EwaldSumTails.f90:
+
+matrix3x3.o: matrix3x3.f90
+	$(COMPILER) $(CFLAGS) matrix3x3.f90
+matrix3x3.f90:
+
+runmc.o: MC.o MoleculeTable.o parameters.o random.o BiasedRandom.o io.o runmc.f90
+	$(COMPILER) $(CFLAGS) runmc.f90
+runmc.f90:
+
+test_xchange.o: MC.o MoleculeTable.o parameters.o random.o io.o test_xchange.f90
+	$(COMPILER) $(CFLAGS) test_xchange.f90
+test_xchange.f90:
+
+BiasedRandom.o: random.o BiasedRandom.f90
+	$(COMPILER) $(CFLAGS) BiasedRandom.f90
+BiasedRandom.f90: 
+
+MCAccumLuc.o: MCAccumLuc.f90 parameters.o constants.o AtomicData.o LJTypes.o composition.o Molecule.o MoleculeHandler.o  
+	$(COMPILER) $(CFLAGS) MCAccumLuc.f90
+MCAccumLuc.f90: 

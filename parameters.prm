@@ -1,0 +1,47 @@
+sr = 4         # rmax = sr / alpha
+               # err_r =  Q (sr/ alpha L^3)^(1/2) exp(-sr^2) / sr^2   
+               #   typical value sr = 3..4
+
+sk = 4        # kmax = s(L*alpha) / pi
+              # err_k = Q (sk/2 alpha L^3)^(1/2) exp(-sk^2) / sk^2
+              # typical value sk = 3..4
+
+alphaL = 0    # alpha * L  , by default (given alphaL=0) :=> alphaL= 2*sr 
+              # rmax =  sr / alpha < L/2 ==>  alpha*L > 2*sr
+              # alpha*L = alpha [L^-1] = 2*sr corresponds to the cutoff L/2 (default, if alphaL=0)
+
+temp =300                       # temperature, K
+external_permutivity = 70       # epsilon_ext
+BoxLength = 0                   # if box_length = 0 --> to be recalculated from density
+density = 30                     # particles/nm^3 
+dr_a =  0.4                     # max. dispacement in Angstroems  
+d_angle_degree = 40             # max rotation  in degree
+xlambda_c =0.0                  # coupling constant for torque ( note: normally xlambda_f = xlambda_c AND xlambda_f = 0.5 )
+xlambda_f = 0.0                 # coupling constant for  force
+
+# simulation
+pressure = 100000  #  in Pascals, i.e. J/m^3, 1Bar = 100000 Pa, 1.atm = 101325 Pa 
+pressure_step_multiplier = 5  # make NPT step at average each nmol * pressure_step_multiplier steps
+                               # set 0 for NVT simulation
+max_volume_scaling = 1.05   #  vnew = vold * max_volume_scaling ** lambda, -1 < lambda < 1
+
+max_cycle = 10000         # number of cycles to do. each cycle includes nmol moves 
+n_store_traj_interval = 100   # save trajectory frames each nmol * n_store_traj_interval steps 
+                              # ( each n_store_traj_interval_cycles)
+
+n_store_energy_interval = 100
+ 
+# format of input moltab file
+input_nbytes_xyz = 2            # number of bytes per coordinate sample
+input_nbytes_ang = 2            # number of bytes per angular sample 
+
+# format of the output moltab file
+output_nbytes_xyz = 2           # number of bytes per coordinate sample
+output_nbytes_ang = 2           # number of bytes per angular sample
+
+# output files                                          
+traj_file = traj.moltraj
+energy_file = energy.dat
+boxlength_file = boxlength.dat
+frames_file = frames.dat
+

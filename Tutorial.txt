@@ -1,0 +1,253 @@
+STEP 0: 
+
+We have the system, described in ion100.composition.
+Look at it:
+
+cat ion100.composition
+
+3
+SPCE.mol  100
+Na_Dang.mol 5
+Cl_Dang.mol 5
+
+
+We have 3 species:  SPCE water, Na, Cl.
+
+Look at them
+cat SPCE.mol
+
+O    0.000000000000000   0.000000000000000   0.0000000000  3.160  0.15  -0.84760  16.0  2.0 
+H    1.000000000000000   0.000000000000000   0.0000000000  0.000  0.00   0.42380   0.0  0
+H   -0.325568154457156   0.945518575599317   0.0000000000  0.000  0.00   0.42380   0.0  0
+
+
+cat Na_Dang.mol
+
+Na 0 0 0 2.592 0.10361 1 1 2.0
+
+cat Cl_Dang.mol
+
+Cl 0 0 0 4.41  0.10361 -1  1 2.0
+
+
+meaning of the columns
+Element, x,y,z, sigma(A), epsilon(kcal/mol), charge, mass(only used to calculate the center of mass), hard_core_diameter (used to avoid overlaps)
+
+STEP 1:
+Generate the input file
+
+make genMoleculeTable 
+
+
+./genMoleculeTable ion100.composition system.moltab
+
+
+the binary file system.moltab will be created
+To look what is inside:
+
+
+make moltab2xyz
+
+./moltab2xyz ion100.composition system.moltab  system.xyz
+
+The file system.xyz in the text *.xyz format will be created
+To look at it one can use any molecular viewes, e.g. vmd or jmol:
+
+jmol system.xyz
+
+
+STEP 3:
+Run the simulation.
+Before it look at the parameters in parameters.prm:
+
+vim parameters.prm
+
+It is more-less self explanatory. Change what you find necesarry.
+
+
+Then run the simulation
+
+ make runmc
+
+ ./runmc parameters.prm ion100.composition system.moltab
+
+Output:
+......_......_.v..vv........._............................._...v....._v..v.v....._....._.....v..v...e         100
+............._....._........._.........._..............vv...._.v..v..v........_......v.^C
+
+. means the move step, v means the volume change, _ means the declinded volume step.
+
+Press Ctrl-C in the middle of the simulation to stop it
+
+
+STEP 5:
+To continue the simulation from the last step run 
+
+  make mccont
+
+  ./mccont parameters.prm ion100.composition
+
+To clear the simulation data and re-start the simulation run
+
+
+make clearmc
+
+./clearmc parameters.prm
+./runmc parameters.prm ion100.composition system.moltab
+
+STEP 6:
+Don't kill the simulation and let it do 10000 steps.
+At the end you will have the trajectory file traj.moltraj, the frames file frames.dat and the energy.dat
+
+Look at them:
+
+tail frames.dat
+
+        9100  15.8013286269     834350.      82242.       1515.       1208.     694864.       4572.  1427150148
+        9200  15.7414865408     843700.      83054.       1530.       1218.     702689.       4600.  1427150153
+        9300  15.7009118689     852280.      83855.       1552.       1232.     709872.       4621.  1427150157
+        9400  15.7208776455     860860.      84654.       1574.       1249.     716997.       4645.  1427150161
+        9500  15.7758975760     870100.      85485.       1590.       1260.     724735.       4679.  1427150165
+        9600  15.6753822597     879340.      86339.       1606.       1272.     732423.       4704.  1427150169
+        9700  15.7409543201     888470.      87218.       1623.       1287.     739994.       4733.  1427150173
+        9800  15.6651175315     897710.      88111.       1639.       1302.     747611.       4765.  1427150177
+        9900  15.7067817048     906840.      88944.       1656.       1318.     755209.       4801.  1427150181
+       10000  15.6978170237     916410.      89857.       1669.       1328.     763155.       4821.  1427150186
+
+
+First column - number of the frame, second - box length at this steo, others - acception rates, the last one - timestamp (UNIX format: seconds since 1 Jan 1970 ).
+
+
+tail -n3 energy.dat
+        9800  -3157.6728250892311       -3612.3334857832033        454.66066069397209        14958.001927689849        311.53321830619865        1032.8179077596785        327.18323972247731       -27.024487140065943     
+        9900  -3152.6388842812439       -3585.0842100275995        432.44532574635554        14940.125130404940        307.24934586440446        1002.7870914950914        322.05295248379417       -27.346947669293339     
+       10000  -3174.0836667611406       -3616.0396982236084        441.95603146246788        14920.238005998230        309.42557041105783        1015.1455622244603        321.84430336989817       -27.195442427330065     
+
+
+First column - frame number, second - total energy, others - different components like coulomb, LJ etc. (see the datails in the Documentation).
+
+
+Trajectories are in the binary format.
+Frames are written each 100 (by default). 
+What one can do - extract some frame from the trajectory.
+The size of the frame is:  Nmol * 12
+ In our case we have  110 * 12 = 1320 
+So, to get say 11 frame in the file use the command:
+
+dd if=traj.moltraj of=fram11.moltab bs=1320 skip=10 count=1
+
+You can again look at it:
+
+./moltab2xyz ion100.composition fram11.moltab  fram11.xyz
+
+jmol fram11.xyz
+
+
+STEP 6:
+RDFs 
+
+make mcrdf2
+
+./mcrdf2 parameters.prm  ion100.composition RDF_ 0.1 12  water,Na,Cl
+
+the files like RDF_water_water.dat, RDF_water_Na.dat etc. will be generated
+
+
+they have 2 columns
+the first column is r, the second - g(r)
+
+%1) run octave
+%2) read RDFs file
+    
+   A = load('RDF_water_water.dat');
+
+%3) look at it
+    plot(A(:,1),A(:,2))
+   
+
+STEP 7:
+
+Calculate forces
+
+make mc_calc_forces
+
+./mc_calc_forces parameters.prm ion100.composition forces.ftraj
+
+
+the binary file forces.ftraj will be generated
+In contains the force frames.
+
+Each frame contains   Natom * 12 bytes
+In our case:
+  Natom = 100*3 + 10 = 310
+  310*12 = 3720
+
+So, we get again frame11.ftab
+
+
+dd if=forces.ftraj of=frame11.ftab bs=3720 skip=10 count=1
+
+make forces2text
+
+./forces2text frame11.ftab  > forces11.txt
+
+Output contains fx,fy,fz components of the forces in the text format, so you can do something with them.
+
+also, you can calculate mean force between the two particles
+
+
+make mc_mean_force
+
+./mc_mean_force parameters.prm ion100.composition forces.ftraj  1 2 20 0.1  MF.dat
+
+The file MF.dat will be generated
+
+It contains the mean force samples for the all distances between the particles 1 and 2.
+The columns are:
+r  sum(f12)  N(r) sum(f12)/N(r) where N(r) is number of AB pairs at distance r
+
+If you fix the particles 1 and 2 you can calculate the mean force at the fixed distance.
+To fix the particles one can use frequences.dat, where set the probability to move them to 0:
+
+3
+1-1  0  0
+2-2  0  0
+3-110  10  10
+
+And then re-start the simulation...
+But this is out of scope of this small tutorial. Please read the Documentation for details.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
